@@ -149,6 +149,10 @@ Anything that honours `ANTHROPIC_BASE_URL` or `OPENAI_BASE_URL`: the official SD
 
 Node 22.13 or newer.
 
+## Working with me
+
+**Want this run on your agent?** I review what production agents send — cost, caching, the paths injection takes — and hand back the numbers with the fixes. Sponsor the project, or write to me: [aggarwal11.rajan05@gmail.com](mailto:aggarwal11.rajan05@gmail.com).
+
 ## License
 
 [MIT](./LICENSE) © Rajan Aggarwal
