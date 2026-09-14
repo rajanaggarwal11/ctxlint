@@ -1,0 +1,46 @@
+import { windowFor } from "./models.js";
+import { fmt } from "./types.js";
+import type { Rule } from "./types.js";
+
+export const growth: Rule = {
+  id: "growth",
+  title: "The context grows every turn and never shrinks",
+  description:
+    "Across the session, input grows by more than --max-growth percent per turn on average; projects the turn at which the window fills.",
+  defaultSeverity: "warn",
+  check(turns, options) {
+    if (turns.length < 4) return [];
+    const totals = turns.map((t) => t.context.totalTokens);
+    let shrank = false;
+    const rates: number[] = [];
+    for (let i = 1; i < totals.length; i++) {
+      const prev = totals[i - 1]!;
+      const cur = totals[i]!;
+      if (cur < prev) shrank = true;
+      if (prev > 0) rates.push((cur - prev) / prev);
+    }
+    if (shrank) return [];
+    const avg = (rates.reduce((a, b) => a + b, 0) / rates.length) * 100;
+    const limit = options.maxGrowthPct ?? 5;
+    if (avg < limit) return [];
+    const last = turns[turns.length - 1]!;
+    const win = options.window
+      ? { tokens: options.window, assumed: false }
+      : windowFor(last.context.model);
+    let projected = totals[totals.length - 1]!;
+    let turn = turns.length;
+    while (projected < win.tokens && turn < 10_000) {
+      projected *= 1 + avg / 100;
+      turn++;
+    }
+    return [
+      {
+        rule: growth.id,
+        severity: "warn",
+        tokens: totals[totals.length - 1]! - totals[0]!,
+        message: `context grew ${avg.toFixed(0)}% per turn over ${turns.length} turns and never shrank — at this rate the ${fmt(win.tokens)} window${win.assumed ? " (assumed; set --window)" : ""} fills at turn ${turn}`,
+        detail: [`${fmt(totals[0]!)} → ${fmt(totals[totals.length - 1]!)} input tokens`],
+      },
+    ];
+  },
+};
