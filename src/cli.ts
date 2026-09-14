@@ -165,9 +165,11 @@ function listRules(): string {
 const oneLine = (x: Exchange, n: number): string => {
   const u = x.response.usage;
   const tokens =
-    u.source === "provider"
-      ? `${fmt(u.input)} in${u.cacheRead ? pc.dim(` (${fmt(u.cacheRead)} cached)`) : ""} · ${fmt(u.output)} out`
-      : pc.dim("no usage in response");
+    x.kind === "other"
+      ? pc.dim("not a chat request")
+      : u.source === "provider"
+        ? `${fmt(u.input)} in${u.cacheRead ? pc.dim(` (${fmt(u.cacheRead)} cached)`) : ""} · ${fmt(u.output)} out`
+        : pc.dim("no usage in response");
   const status = x.error
     ? pc.red(`✗ ${x.error}`)
     : x.response.status >= 400

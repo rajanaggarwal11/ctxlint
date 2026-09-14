@@ -131,7 +131,7 @@ describe("check and report on a recorded session", () => {
     const r = await cli("report", s);
     expect(r.code).toBe(0);
     expect(r.stdout).toContain("3 requests");
-    expect(r.stdout).toMatch(/turn\s+input\s+cached\s+output\s+system\s+tools\s+history/);
+    expect(r.stdout).toMatch(/turn\s+input\s+cache r\/w\s+output\s+system\s+tools\s+history/);
     expect(r.stdout).toContain("3,200");
     const j = await cli("report", s, "--json");
     const report = JSON.parse(j.stdout) as {
@@ -190,8 +190,11 @@ describe("wrap", () => {
     expect(r.stderr).toContain("#1 POST anthropic/v1/messages");
     const file = readFileSync(sessionFile, "utf8");
     expect(file.split("\n").filter(Boolean)).toHaveLength(2);
-    expect(file).not.toContain("WWWW".repeat(2) + "W".repeat(32));
+    // The header is stripped; the body is content — it is exactly what gets linted.
     expect(file).toContain('"x-api-key":"[stripped]"');
+    expect(file).toContain("ANTHROPIC_API_KEY=sk-ant-api03-");
+    // The finding names the secret's kind and place, never the secret.
+    expect(r.stdout).not.toContain("WWWWWWWW");
   }, 30_000);
 
   it("propagates the child's exit code when it fails", async () => {

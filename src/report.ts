@@ -32,7 +32,7 @@ export function renderTurns(turns: Turn[]): string {
   const lines: string[] = [];
   lines.push(
     pc.dim(
-      `${pad("turn", 5)}  ${pad("input", 9)}  ${pad("cached", 8)}  ${pad("output", 7)}  ${pad("system", 7)}  ${pad("tools", 6)}  ${pad("history", 8)}  model`,
+      `${pad("turn", 5)}  ${pad("input", 9)}  ${pad("cache r/w", 10)}  ${pad("output", 7)}  ${pad("system", 7)}  ${pad("tools", 6)}  ${pad("history", 8)}  model`,
     ),
   );
   for (const t of turns) {
@@ -40,8 +40,13 @@ export function renderTurns(turns: Turn[]): string {
     const total = t.context.totalTokens;
     const history = s.user + s.assistant + s.toolResult;
     const u = t.context.usage;
+    const cache = u.cacheRead
+      ? `${fmt(u.cacheRead)} r`
+      : u.cacheWrite
+        ? `${fmt(u.cacheWrite)} w`
+        : "—";
     lines.push(
-      `${pad(String(t.n), 5)}  ${pad((t.context.exact ? "" : "≈") + fmt(total), 9)}  ${pad(u.cacheRead ? fmt(u.cacheRead) : "—", 8)}  ${pad(u.source === "provider" ? fmt(u.output) : "—", 7)}  ${pad(pct(s.system, total), 7)}  ${pad(pct(s.tools, total), 6)}  ${pad(pct(history, total), 8)}  ${pc.dim(t.context.model ?? "")}`,
+      `${pad(String(t.n), 5)}  ${pad((t.context.exact ? "" : "≈") + fmt(total), 9)}  ${pad(cache, 10)}  ${pad(u.source === "provider" ? fmt(u.output) : "—", 7)}  ${pad(pct(s.system, total), 7)}  ${pad(pct(s.tools, total), 6)}  ${pad(pct(history, total), 8)}  ${pc.dim(t.context.model ?? "")}`,
     );
   }
   return lines.join("\n") + "\n";
