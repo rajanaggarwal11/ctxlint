@@ -36,7 +36,7 @@ Proxy options
 
 Lint options
   --budget <n>            Input tokens per request above which 'budget' fires
-  --max-growth <pct>      Growth per turn above which 'growth' fires (default 5)
+  --max-growth <pct>      Median growth per turn above which 'growth' fires (default 10)
   --window <n>            Context window for the growth projection (default: from the model)
   --only <ids>            Run only these rules (comma-separated)
   --ignore <ids>          Skip these rules (comma-separated)

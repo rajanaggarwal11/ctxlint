@@ -1,25 +1,28 @@
-# Security policy
+# Security
 
-## Supported versions
+`ctxlint` is a local proxy that sits between your application and Anthropic or OpenAI, and a
+linter over what passes through it. Three things about it are security-relevant, and each is
+tested:
 
-The latest published minor version receives fixes. This project is pre-1.0, so older minors are not backported.
+- **It never modifies a request or a response.** Bytes go upstream and come back exactly as
+  sent — still compressed, still streaming. A copy is decoded on the side for the record.
+- **The record never contains a credential.** Every `authorization`, `x-api-key`, `api-key`,
+  `cookie` and similar header is replaced with `[stripped]` before an exchange exists. The
+  record does contain the _content_ of requests — that is what gets linted — and it stays on
+  your machine (`ctxlint.session.jsonl`; `--no-record` keeps nothing).
+- **It listens on 127.0.0.1 only**, on a free port, for the life of the command.
 
-## Reporting a vulnerability
+## Reporting
 
-Please report privately through GitHub's [security advisory form](https://github.com/rajanaggarwal11/mcpcheck/security/advisories/new) rather than opening a public issue.
+Please report privately through GitHub's
+[security advisory form](https://github.com/rajanaggarwal11/ctxlint/security/advisories/new)
+rather than a public issue, for anything like:
 
-You should get an acknowledgement within 72 hours and an assessment within a week.
+- A way the proxy could alter, drop or reorder what the model receives or what the client
+  receives.
+- A credential reaching the record, the terminal, or the JSON output by any path.
+- A way to make the proxy forward to a host the user did not name with `--upstream`.
+- A finding message that repeats a secret (`secret-in-context` is designed never to).
 
-## Scope
-
-`mcpcheck` connects to an MCP server you name, performs the `initialize` handshake and
-`tools/list`, and disconnects. It never calls a tool. It spawns the command you give it and
-reads that process's stderr only to explain a failed handshake.
-
-The reports most worth making:
-
-- A description-lint pattern that can be evaded trivially (an instruction the model would
-  obey that the rule does not see), or a false positive on the official reference servers.
-- Any path by which mcpcheck invokes a tool, or writes anything other than the snapshot file
-  you named.
-- Output that includes a credential from a connection URL.
+Everything else — a rule that misfires on your traffic, a wrong number — is an ordinary
+issue, and a welcome one.

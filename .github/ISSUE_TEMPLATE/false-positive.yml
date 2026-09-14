@@ -1,5 +1,5 @@
 name: False positive
-description: ctxlint flagged something on my server that is actually fine
+description: ctxlint flagged something in my app's requests that is actually fine
 labels: [false-positive]
 body:
   - type: input

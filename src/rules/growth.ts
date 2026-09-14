@@ -8,14 +8,17 @@ const median = (xs: number[]): number => {
   return s.length % 2 ? s[mid]! : (s[mid - 1]! + s[mid]!) / 2;
 };
 
+/** Fewer turns than this and a projection means nothing; an agent reading files grows fast at first. */
+const MIN_TURNS = 6;
+const DEFAULT_LIMIT = 10;
+
 export const growth: Rule = {
   id: "growth",
   title: "The context grows every turn and never shrinks",
-  description:
-    "Across the session, input grows by more than --max-growth percent per turn (median, so a small warm-up call does not distort it); projects the turn at which the window fills.",
+  description: `Over ${MIN_TURNS}+ turns, input grows by more than --max-growth percent per turn (default ${DEFAULT_LIMIT}; the median, so a warm-up call does not distort it) and never shrinks; projects the turn at which the window fills.`,
   defaultSeverity: "warn",
   check(turns, options) {
-    if (turns.length < 4) return [];
+    if (turns.length < MIN_TURNS) return [];
     const totals = turns.map((t) => t.context.totalTokens);
     let shrank = false;
     const rates: number[] = [];
@@ -29,7 +32,7 @@ export const growth: Rule = {
     // The median, not the mean: an agent's first call is often a tiny warm-up,
     // and the jump from it to the real first turn is not "growth".
     const rate = median(rates) * 100;
-    const limit = options.maxGrowthPct ?? 5;
+    const limit = options.maxGrowthPct ?? DEFAULT_LIMIT;
     if (rate < limit) return [];
     const last = turns[turns.length - 1]!;
     const win = options.window
