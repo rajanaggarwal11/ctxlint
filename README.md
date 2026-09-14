@@ -38,7 +38,7 @@ tools: 29 defined, 26,244 tokens on turn 4 · largest: Bash 3,218 · DesignSync 
 1 finding: 1 warning · 89,208 tokens at stake
 ```
 
-Three requests in, 56% of every turn is 29 tool definitions, 27 of which this task never touched. Nothing here is a bug in Claude Code — it caches all of it and pays a tenth of the price — but nobody had a way to see it before.
+Every turn after the warm-up is 56–73% tool definitions — 29 of them, 27 of which this task never touched. Nothing here is a bug in Claude Code — it caches all of it and pays a tenth of the price — but nobody had a way to see it before.
 
 ## What it finds
 
