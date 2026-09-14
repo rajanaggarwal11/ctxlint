@@ -1,0 +1,21 @@
+name: False positive
+description: ctxlint flagged something on my server that is actually fine
+labels: [false-positive]
+body:
+  - type: input
+    id: rule
+    attributes: { label: Rule, placeholder: "annotation-honesty" }
+    validations: { required: true }
+  - type: textarea
+    id: tool
+    attributes:
+      {
+        label: The tool as advertised,
+        description: "The entry from tools/list — name, description, inputSchema, annotations.",
+        render: json,
+      }
+    validations: { required: true }
+  - type: textarea
+    id: why
+    attributes: { label: Why it is fine }
+    validations: { required: true }
