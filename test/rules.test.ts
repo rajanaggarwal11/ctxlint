@@ -33,7 +33,7 @@ describe("growth", () => {
     const f = only(s, "growth");
     expect(f).toHaveLength(1);
     expect(f[0]?.message).toMatch(
-      /grew 12% per turn over 8 turns and never shrank — at this rate the 200,000 window fills at turn \d+/,
+      /grew 12% per turn \(median\) over 8 turns and never shrank — at this rate the 200,000 window fills at turn \d+/,
     );
     expect(f[0]?.message).not.toContain("assumed");
   });
@@ -51,6 +51,15 @@ describe("growth", () => {
       { usageFor: (i) => ({ input: 20_000 + i * 400 }) },
     );
     expect(only(gentle, "growth")).toEqual([]);
+  });
+
+  it("uses the median, so a tiny warm-up call does not read as explosive growth", () => {
+    const s = conversation(
+      5,
+      { system: prose(200) },
+      { usageFor: (i) => (i === 0 ? { input: 900 } : { input: 35_000 + (i - 1) * 300 }) },
+    );
+    expect(only(s, "growth")).toEqual([]);
   });
 
   it("says when the window is assumed", () => {
@@ -161,6 +170,16 @@ describe("unused-tools", () => {
       /18 of 20 tool definitions were never called in 5 turns — [\d,]+ tokens on every turn/,
     );
     expect(f[0]?.detail?.[0]).toContain("tool_0, tool_3");
+  });
+
+  it("still counts when a warm-up turn carried no tools", () => {
+    const s = [
+      anthropicExchange({ messages: [{ role: "user", content: "hi" }], usage: { input: 30 } }, 99),
+      ...conversation(3, { tools, calls: ["tool_1"], usage: { input: 30_000 } }),
+    ];
+    expect(only(s, "unused-tools")[0]?.message).toContain(
+      "19 of 20 tool definitions were never called in 4 turns",
+    );
   });
 
   it("stays quiet for short sessions and when every tool was used at least once", () => {

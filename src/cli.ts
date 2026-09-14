@@ -42,6 +42,7 @@ Lint options
   --ignore <ids>          Skip these rules (comma-separated)
   --strict                Exit 1 on warnings too
   --json                  Machine-readable output (stable shape, version 1)
+  --sections              Also print every section of the last request, largest first
   --list-rules            Print every rule and what it checks
   -v, --version           Print the version
   -h, --help              Print this
@@ -86,6 +87,7 @@ function parse(argv: string[]): Parsed {
       strict: { type: "boolean" },
       json: { type: "boolean" },
       "list-rules": { type: "boolean" },
+      sections: { type: "boolean" },
       version: { type: "boolean", short: "v" },
       help: { type: "boolean", short: "h" },
     },
@@ -213,7 +215,7 @@ async function runProxy(p: Parsed, wrap: boolean): Promise<number> {
     const result = lintExchanges(exchanges, opts);
     const title = sessionPath ?? "not recorded";
     if (p.values.json) process.stdout.write(JSON.stringify(toJson(result, title), null, 2) + "\n");
-    else process.stdout.write("\n" + renderReport(result, title));
+    else process.stdout.write("\n" + renderReport(result, title, !!p.values.sections));
     return exitFor(result.findings, !!p.values.strict);
   };
 
@@ -263,7 +265,8 @@ function runOnSession(p: Parsed): number {
     );
   const result = lintExchanges(readSession(path), lintOptions(p));
   if (p.values.json) process.stdout.write(JSON.stringify(toJson(result, file), null, 2) + "\n");
-  else if (p.command === "report") process.stdout.write(renderReport(result, file));
+  else if (p.command === "report")
+    process.stdout.write(renderReport(result, file, !!p.values.sections));
   else process.stdout.write(renderFindings(result.findings) + renderSummary(result.findings));
   return exitFor(result.findings, !!p.values.strict);
 }

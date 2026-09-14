@@ -150,6 +150,22 @@ describe("check and report on a recorded session", () => {
     expect(report.summary.total).toBe(report.findings.length);
   });
 
+  it("--sections lists the last request's sections largest first, and the tools line names the biggest definitions", async () => {
+    const s = session(
+      "sections.jsonl",
+      conversation(3, {
+        system: prose(800, "s"),
+        tools: [{ name: "big_tool", description: prose(400, "big") }, { name: "small_tool" }],
+        usage: { input: 2000 },
+      }),
+    );
+    const r = await cli("report", s, "--sections");
+    expect(r.stdout).toContain("tools: 2 defined");
+    expect(r.stdout).toMatch(/largest: big_tool [\d,]+ · small_tool [\d,]+/);
+    expect(r.stdout).toContain("sections of turn 3, largest first");
+    expect(r.stdout.indexOf("system")).toBeLessThan(r.stdout.indexOf("tool big_tool"));
+  });
+
   it("budget accepts 40k", async () => {
     const s = session("budget.jsonl", [
       anthropicExchange({ messages: [{ role: "user", content: "hi" }], usage: { input: 50_000 } }),

@@ -52,6 +52,46 @@ export function renderTurns(turns: Turn[]): string {
   return lines.join("\n") + "\n";
 }
 
+/** One line on the tool definitions of the last request that carries any: how many, and the biggest. */
+export function renderTools(turns: Turn[]): string {
+  const last = [...turns].reverse().find((t) => t.context.tools.length);
+  if (!last) return "";
+  const defs = last.context.sections
+    .filter((s) => s.kind === "tool-def")
+    .sort((a, b) => b.tokens - a.tokens);
+  const total = defs.reduce((a, s) => a + s.tokens, 0);
+  const approx = last.context.exact ? "" : "≈";
+  const top = defs
+    .slice(0, 5)
+    .map((s) => `${s.name} ${approx}${fmt(s.tokens)}`)
+    .join(" · ");
+  return `${pc.dim("tools:")} ${defs.length} defined, ${approx}${fmt(total)} tokens on turn ${last.n} ${pc.dim(`· largest: ${top}`)}\n`;
+}
+
+/** Every section of the last request, largest first. */
+export function renderSections(turns: Turn[]): string {
+  const last = turns[turns.length - 1];
+  if (!last) return "";
+  const total = last.context.totalTokens || 1;
+  const approx = last.context.exact ? "" : "≈";
+  const rows = [...last.context.sections].sort((a, b) => b.tokens - a.tokens);
+  const lines = [pc.dim(`sections of turn ${last.n}, largest first`)];
+  for (const s of rows) {
+    const label =
+      s.kind === "system"
+        ? "system"
+        : s.kind === "tool-def"
+          ? `tool ${s.name ?? ""}`
+          : s.kind === "tool-result"
+            ? `result ${s.name ?? ""} (msg ${s.turn + 1})`
+            : `${s.kind} (msg ${s.turn + 1})`;
+    lines.push(
+      `${pad(approx + fmt(s.tokens), 9)}  ${pad(pct(s.tokens, total), 4)}  ${label}${s.cacheControl ? pc.dim("  [cache_control]") : ""}`,
+    );
+  }
+  return lines.join("\n") + "\n";
+}
+
 export function renderFindings(findings: Finding[]): string {
   if (!findings.length) return `${pc.green("✓")} No problems found.\n`;
   const out: string[] = [];
@@ -88,10 +128,23 @@ export function renderSummary(findings: Finding[]): string {
   return `${pc.dim("─".repeat(48))}\n${pc.bold(`${s.total} finding${s.total === 1 ? "" : "s"}`)}: ${parts.join(", ")}${stake}\n`;
 }
 
-export function renderReport(result: LintResult, title: string): string {
+export function renderReport(result: LintResult, title: string, sections = false): string {
   const models = [...new Set(result.turns.map((t) => t.context.model).filter(Boolean))];
   const head = `${pc.bold("ctxlint")}${pc.dim(` · ${result.turns.length} request${result.turns.length === 1 ? "" : "s"}${models.length ? ` · ${models.join(", ")}` : ""} · ${title}`)}\n`;
-  return `${head}\n${renderTurns(result.turns)}\n${renderFindings(result.findings)}${renderSummary(result.findings)}`;
+  const tools = renderTools(result.turns);
+  return `${head}
+${renderTurns(result.turns)}${
+    tools
+      ? `
+${tools}`
+      : ""
+  }${
+    sections
+      ? `
+${renderSections(result.turns)}`
+      : ""
+  }
+${renderFindings(result.findings)}${renderSummary(result.findings)}`;
 }
 
 export function toJson(result: LintResult, session: string) {
