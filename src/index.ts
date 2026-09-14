@@ -11,3 +11,11 @@ export { lintExchanges, turnsOf } from "./lint.js";
 export type { LintOptions, LintResult } from "./lint.js";
 export { ALL_RULES, RULE_IDS } from "./rules/index.js";
 export type { Finding, Rule, RuleId, RuleOptions, Severity, Turn } from "./rules/index.js";
+export {
+  renderReport,
+  renderFindings,
+  renderSummary,
+  toJson,
+  summarize,
+  sectionTotals,
+} from "./report.js";
