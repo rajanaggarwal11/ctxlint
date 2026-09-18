@@ -120,9 +120,12 @@ function rules(v: unknown, flag: string): RuleId[] | undefined {
 function int(v: unknown, flag: string): number | undefined {
   const s = str(v);
   if (s === undefined) return undefined;
-  const n = Number(s.replace(/[_,]/g, "").replace(/k$/i, "000"));
-  if (!Number.isFinite(n) || n < 0) throw new UsageError(`${flag} expects a number, got "${s}"`);
-  return n;
+  // 40000, 40_000, 40,000, 40k, 1.5k, 1m. The suffix multiplies; replacing "k"
+  // with "000" as text would read 1.5k as 1.5.
+  const m = /^(\d+(?:\.\d+)?)([km])?$/i.exec(s.replace(/[_,]/g, "").trim());
+  if (!m) throw new UsageError(`${flag} expects a number like 40000, 40k or 1.5m, got "${s}"`);
+  const scale = m[2] ? (m[2].toLowerCase() === "k" ? 1_000 : 1_000_000) : 1;
+  return Math.round(Number(m[1]) * scale);
 }
 
 class UsageError extends Error {}
