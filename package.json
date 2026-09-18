@@ -1,6 +1,6 @@
 {
   "name": "ctxlint",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "What are you actually sending the model? A local proxy that lints every request your app makes to Anthropic or OpenAI — wasted tokens, duplicated content, unused tools, prompt-cache misses, secrets, injection in tool results. Never modifies a request.",
   "keywords": [
     "llm",
