@@ -1,5 +1,11 @@
 # ctxlint
 
+## 0.1.1
+
+### Patch Changes
+
+- [#11](https://github.com/rajanaggarwal11/ctxlint/pull/11) [`900118e`](https://github.com/rajanaggarwal11/ctxlint/commit/900118eac5ba23c7b9bd421b231010e8a42ed32e) Thanks [@rajanaggarwal11](https://github.com/rajanaggarwal11)! - `--budget`, `--window` and `--max-growth` read a `k` or `m` suffix as a multiplier: `--budget 1.5k` is 1,500 tokens, not 1.5. A value that is not a number now says what it expects.
+
 ## 0.1.0
 
 ### Minor Changes
