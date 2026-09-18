@@ -1,5 +1,7 @@
 # ctxlint
 
+[![CI](https://github.com/rajanaggarwal11/ctxlint/actions/workflows/ci.yml/badge.svg)](https://github.com/rajanaggarwal11/ctxlint/actions/workflows/ci.yml) [![CodeQL](https://github.com/rajanaggarwal11/ctxlint/actions/workflows/codeql.yml/badge.svg)](https://github.com/rajanaggarwal11/ctxlint/actions/workflows/codeql.yml) [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
+
 **What are you actually sending the model?** Every LLM app has a context window, and almost nobody can see it: the framework assembles it, the SDK sends it, the bill arrives. `ctxlint` is a local proxy that reads every request your app makes to Anthropic or OpenAI and lints it — wasted tokens, the same block sent twice, tool definitions nobody calls, prompt-cache misses and the exact character that caused them, secrets in the prompt, injection arriving through tool results, and how fast the context is growing.
 
 ```bash
