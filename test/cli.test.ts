@@ -166,6 +166,20 @@ describe("check and report on a recorded session", () => {
     expect(r.stdout.indexOf("system")).toBeLessThan(r.stdout.indexOf("tool big_tool"));
   });
 
+  it("budget reads a k or m suffix as a multiplier, decimals included", async () => {
+    const s = session("suffix.jsonl", [
+      anthropicExchange({ messages: [{ role: "user", content: "hi" }], usage: { input: 2_000 } }),
+    ]);
+    const r = await cli("check", s, "--budget", "1.5k", "--strict");
+    expect(r.code).toBe(1);
+    expect(r.stdout).toContain("budget 1,500");
+    expect((await cli("check", s, "--budget", "0.002m", "--strict")).code).toBe(0);
+    expect((await cli("check", s, "--budget", "40_000")).code).toBe(0);
+    const bad = await cli("check", s, "--budget", "1.5x");
+    expect(bad.code).toBe(2);
+    expect(bad.stderr).toContain("like 40000, 40k or 1.5m");
+  });
+
   it("budget accepts 40k", async () => {
     const s = session("budget.jsonl", [
       anthropicExchange({ messages: [{ role: "user", content: "hi" }], usage: { input: 50_000 } }),
