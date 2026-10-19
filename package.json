@@ -58,7 +58,7 @@
     "publint": "publint"
   },
   "dependencies": {
-    "gpt-tokenizer": "^4.0.0",
+    "gpt-tokenizer": "^4.0.3",
     "picocolors": "^1.1.1"
   },
   "devDependencies": {
